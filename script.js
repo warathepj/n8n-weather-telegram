@@ -2,7 +2,7 @@
 // Processes hourly forecast data and formats for Telegram
 
 // Configuration
-const DISPLAY_TIMEZONE = 'Europe/Luxembourg'; // Target timezone for display
+const DISPLAY_TIMEZONE = 'Asia/Bangkok'; // Target timezone for display
 const LOCATION_NAME_FALLBACK = 'Selected Location'; // Fallback if location name can't be derived
 const DATA_SOURCE_NAME = 'Open-Meteo'; // Source of the weather data
 
@@ -111,7 +111,7 @@ const inputData = items[0].json;
 const hourlyData = inputData.hourly;
 
 // Location and Timezone Information
-const locationName = inputData.timezone_abbreviation || LOCATION_NAME_FALLBACK; // e.g., "GMT" or a fallback
+const locationName = DISPLAY_TIMEZONE === 'Asia/Bangkok' ? 'Bangkok' : inputData.timezone_abbreviation || LOCATION_NAME_FALLBACK; // Use 'Bangkok' if timezone is Asia/Bangkok, otherwise fallback
 // const country = ''; // Country is not in this data structure, can be set if known
 
 const now = new Date();
@@ -176,7 +176,7 @@ for (let i = 0; i < hourlyData.time.length; i++) {
         const windTextHourly = windSpeedKmh > 10 ? `, 💨 ${windSpeedKmh.toFixed(0)} km/h` : '';
         const uvText = getUVAdvice(forecastHourNumInDisplayTz);
 
-        hourlySummary += `🕒 <b>${forecastTimeInDisplayTz}</b> ${currentHourWeatherEmoji} ${temp}°C${rainText}${windTextHourly}\n`;
+        hourlySummary += `🕒 ${forecastTimeInDisplayTz} ${currentHourWeatherEmoji} ${temp}°C${rainText}${windTextHourly}\n`;
         if (uvText) hourlySummary += `    ${uvText}\n`;
     }
 }
@@ -188,7 +188,7 @@ if (weatherCount > 0) {
 }
 
 // Build comprehensive message
-let message = `${headerIcon} <b>Weather Forecast for ${locationName}</b>\n`;
+let message = `${headerIcon} Weather Forecast for ${locationName}\n`;
 message += `📅 ${now.toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
@@ -198,7 +198,7 @@ message += `📅 ${now.toLocaleDateString('en-GB', {
 })}\n\n`;
 
 // Daily overview
-message += `<b>📊 Daily Overview</b>\n`;
+message += `📊 Daily Overview\n`;
 if (dayHighTemp > -Infinity && dayLowTemp < Infinity && weatherCount > 0) {
     message += `🌡️ Range: ${dayLowTemp}°C - ${dayHighTemp}°C\n`;
 } else if (weatherCount === 0) {
@@ -217,10 +217,10 @@ message += `\n`;
 
 // Hourly forecast
 if (hourlySummary) {
-    message += `<b>⏰ Hourly Forecast</b>\n`;
+    message += `⏰ Hourly Forecast\n`;
     message += hourlySummary;
 } else {
-    message += `<b>⏰ Hourly Forecast</b>\nNo forecast data available for the selected hours today.\n`;
+    message += `⏰ Hourly Forecast\nNo forecast data available for the selected hours today.\n`;
 }
 
 
@@ -245,7 +245,7 @@ if (hourlySummary.includes("Consider sun protection")) {
 
 
 if (recommendations) {
-    message += `\n<b>💡 Recommendations</b>\n`;
+    message += `\n💡 Recommendations\n`;
     message += recommendations;
 }
 
@@ -264,6 +264,6 @@ try {
     if (DISPLAY_TIMEZONE === 'Europe/Luxembourg') displayTimezoneAbbr = 'CET/CEST';
 }
 
-message += `\n<i>📡 Data from ${DATA_SOURCE_NAME} | Updated: ${updateTime} ${displayTimezoneAbbr}</i>`;
+message += `\n📡 Data from ${DATA_SOURCE_NAME} | Updated: ${updateTime} ${displayTimezoneAbbr}`;
 
 return [{ json: { message: message } }];
